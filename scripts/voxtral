@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["httpx"]
+# ///
+# ABOUTME: Mistral Voxtral TTS CLI — converts text to speech via Mistral's API
+# ABOUTME: Prints the output file path to stdout; use with $(...) to capture it
+
+import argparse
+import hashlib
+import os
+import re
+import subprocess
+import sys
+import httpx
+from pathlib import Path
+
+VOICES = ["margaret", "nick", "angele", "sanchit", "gustavo", "khyathi", "yassir", "patrick"]
+MODEL = "voxtral"
+API_URL = "https://api.mistral.ai/v1/audio/speech"
+
+
+def build_output_path(text: str, fmt: str) -> str:
+    """Returns a deterministic /tmp path based on the text content."""
+    h = hashlib.md5(text.encode()).hexdigest()[:8]
+    return f"/tmp/voxtral_{h}.{fmt}"
+
+
+def fetch_audio(text: str, voice: str, model: str, api_key: str, fmt: str) -> bytes:
+    """Calls the Mistral TTS API and returns raw audio bytes."""
+    try:
+        r = httpx.post(
+            API_URL,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": model,
+                "input": text,
+                "voice": voice,
+                "response_format": fmt,
+            },
+            timeout=60.0,
+        )
+        r.raise_for_status()
+    except httpx.HTTPStatusError as e:
+        print(f"API error {e.response.status_code}: {e.response.text}", file=sys.stderr)
+        sys.exit(1)
+    except httpx.RequestError as e:
+        print(f"Request failed: {e}", file=sys.stderr)
+        sys.exit(1)
+    return r.content
+
+
+def strip_markdown(text: str) -> str:
+    """Removes markdown formatting for clean TTS input."""
+    text = re.sub(r'```[\s\S]*?```', '', text)
+    text = re.sub(r'`([^`]+)`', r'\1', text)
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'\*{2,3}(.+?)\*{2,3}', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'_{2,3}(.+?)_{2,3}', r'\1', text)
+    text = re.sub(r'_(.+?)_', r'\1', text)
+    text = re.sub(r'^\s*[-*+]\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
+def truncate_text(text: str, max_chars: int = 2000) -> str:
+    """Clips text to max_chars, appending an ellipsis if truncated."""
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars - 1] + "\u2026"
+
+
+def play_audio(path: str) -> None:
+    """Plays audio via afplay on macOS; warns on other platforms."""
+    if sys.platform == "darwin":
+        subprocess.run(["afplay", path], check=True)
+    else:
+        print(f"Warning: --play not supported on {sys.platform}", file=sys.stderr)
+
+
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description="Mistral Voxtral TTS")
+    parser.add_argument("text", nargs="?", help="Text to synthesize (or pipe via stdin)")
+    parser.add_argument("-v", "--voice", default="margaret",
+                        help=f"Voice name. Options: {', '.join(VOICES)}")
+    parser.add_argument("-o", "--output",
+                        help="Output file path (default: /tmp/voxtral_<hash>.mp3)")
+    parser.add_argument("-m", "--model", default=MODEL,
+                        help=f"Model name (default: {MODEL})")
+    parser.add_argument("--format", default="mp3", choices=["mp3", "wav"],
+                        help="Audio format (default: mp3)")
+    parser.add_argument("--strip-md", action="store_true",
+                        help="Strip markdown formatting before synthesis")
+    parser.add_argument("--truncate", action="store_true",
+                        help="Clip text to 2000 chars instead of erroring")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="Skip cache; always call API even if output exists")
+    parser.add_argument("--play", action="store_true",
+                        help="Play audio immediately after generating (macOS only)")
+    args = parser.parse_args(argv)
+
+    if not args.text:
+        if sys.stdin.isatty():
+            parser.error("provide text as an argument or pipe it via stdin")
+        args.text = sys.stdin.read().strip()
+        if not args.text:
+            parser.error("stdin was empty")
+
+    if args.strip_md:
+        args.text = strip_markdown(args.text)
+
+    MAX_CHARS = 2000
+    if len(args.text) > MAX_CHARS:
+        if args.truncate:
+            args.text = truncate_text(args.text, MAX_CHARS)
+        else:
+            print(
+                f"Error: text is {len(args.text)} chars (max {MAX_CHARS}). Use --truncate to clip.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    out_path = args.output if args.output else build_output_path(args.text, args.format)
+
+    if not args.no_cache and not args.output and Path(out_path).exists():
+        print(out_path)
+        return
+
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if not api_key:
+        print("Error: MISTRAL_API_KEY not set", file=sys.stderr)
+        sys.exit(1)
+
+    audio = fetch_audio(args.text, args.voice, args.model, api_key, args.format)
+    Path(out_path).write_bytes(audio)
+
+    if args.play:
+        play_audio(out_path)
+
+    print(out_path)
+
+
+if __name__ == "__main__":
+    main()
