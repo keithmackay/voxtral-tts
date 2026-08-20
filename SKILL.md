@@ -24,6 +24,12 @@ Mistral Voxtral TTS via `scripts/voxtral`.
 **Model:** `voxtral` · **Latency:** ~70ms for 500 chars
 **Requires:** `MISTRAL_API_KEY`
 
+## Flags
+
+### `--help`
+
+If the user invokes this skill with a `--help` flag (e.g. `/voxtral-tts --help`), do not run the TTS flow. Instead, read and display the contents of `help.md` (in this skill's folder) verbatim, then stop.
+
 ## Quick Start
 
 ```bash

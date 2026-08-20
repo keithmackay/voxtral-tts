@@ -62,8 +62,16 @@ message channel:telegram action:send to:"<chatId>" media:"file://$FILE"
 
 When a coding agent sees a `--voice` flag or a request to "send as voice note," it strips markdown, truncates if needed, generates the audio, and sends it to the originating channel automatically.
 
+```
+/voxtral-tts --help    # print usage summary, take no other action
+```
+
 > [!NOTE]
 > If Voxtral requests start returning 404s, the model name may have changed — check `GET https://api.mistral.ai/v1/models`.
+
+## Contributing
+
+Pull requests are welcome — fork the repo, make your change, and open a PR describing what it does and why.
 
 ## License
 
