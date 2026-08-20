@@ -19,15 +19,87 @@ A Claude Code skill that converts text to speech using Mistral's Voxtral model, 
 
 ### Installation
 
+#### Claude Code
+
 ```bash
-git clone https://github.com/keithmackay/voxtral-tts.git
-
-# Global install (available in all projects)
-ln -s "$(pwd)/voxtral-tts" ~/.claude/skills/voxtral-tts
-
-# Project-local install (available only in one project)
-ln -s "$(pwd)/voxtral-tts" /path/to/your/project/.claude/skills/voxtral-tts
+cp -r /path/to/voxtral-tts/ ~/.claude/skills/voxtral-tts/
 ```
+
+Or symlink:
+```bash
+ln -s /path/to/voxtral-tts/ ~/.claude/skills/voxtral-tts
+```
+
+Then invoke with: `/voxtral-tts`
+
+#### Codex
+
+Place the plugin directory where Codex can find it, then add an entry to your marketplace:
+
+**`~/.agents/plugins/marketplace.json`** (create if absent):
+```json
+{
+  "name": "personal",
+  "interface": { "displayName": "Personal Plugins" },
+  "plugins": [
+    {
+      "name": "voxtral-tts",
+      "source": { "source": "local", "path": "/path/to/voxtral-tts/" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}
+```
+
+#### Antigravity
+
+**Global install** (all workspaces):
+```bash
+cp -r /path/to/voxtral-tts/ ~/.gemini/antigravity/skills/voxtral-tts/
+```
+
+**Workspace install** (current project only):
+```bash
+cp -r /path/to/voxtral-tts/ .agents/skills/voxtral-tts/
+```
+
+The source skill has Claude Code-specific metadata (`metadata.openclaw`), so use the `antigravity/SKILL.md` version instead of the root `SKILL.md`.
+
+Skills are auto-discovered. You can also mention the skill by name to force activation.
+
+#### Gemini CLI
+
+Gemini CLI installs extensions directly from GitHub:
+
+```bash
+gemini extensions install https://github.com/keithmackay/voxtral-tts
+```
+
+To update:
+```bash
+gemini extensions update voxtral-tts
+```
+
+The skill is auto-discovered from `GEMINI.md` after installation.
+
+## Compatibility
+
+| Feature | Claude Code | Codex | Antigravity | Gemini CLI |
+|---------|:-----------:|:-----:|:-----------:|:----------:|
+| Core skill | ✅ | ✅ | ✅ | ✅ |
+| `metadata.openclaw` (emoji, required env) | ✅ | ❌ | ❌ | ❌ |
+
+Legend: ✅ Supported · ❌ Not supported
+
+## References
+
+- **Claude Code Skills:** https://code.claude.com/docs/en/skills
+- **Claude Code Complete Guide (PDF):** https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf
+- **Codex Plugins:** https://developers.openai.com/codex/plugins/build
+- **Antigravity Skills:** https://antigravity.google/docs/skills
+- **Gemini CLI Extensions:** https://github.com/google-gemini/gemini-cli/blob/main/docs/extension.md
+- **Agent Skills open standard:** https://agentskills.io/home
 
 ## Usage
 

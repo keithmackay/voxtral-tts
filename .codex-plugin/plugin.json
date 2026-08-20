@@ -1,0 +1,6 @@
+{
+  "name": "voxtral-tts",
+  "version": "1.0.0",
+  "description": "Mistral Voxtral TTS — convert text to speech using Mistral's Voxtral model ($0.016/1,000 chars). Use when asked to speak a response aloud, send a voice note to Discord or Telegram, or when the --voice flag is set on any coding agent response. Also use when Keith says \"read that to me\", \"voice note\", or \"send as audio\".",
+  "skills": "./skills/"
+}
