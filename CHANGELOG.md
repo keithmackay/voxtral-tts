@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+- Add Changelog section to README linking CHANGELOG.md
 - Port voxtral-tts to Codex, Antigravity, and Gemini CLI
 
 ## [1.0.0] - 2026-08-20
