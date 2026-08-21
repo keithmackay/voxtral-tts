@@ -145,6 +145,10 @@ When a coding agent sees a `--voice` flag or a request to "send as voice note," 
 
 Pull requests are welcome — fork the repo, make your change, and open a PR describing what it does and why.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## License
 
 [MIT](LICENSE)
