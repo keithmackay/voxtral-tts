@@ -19,6 +19,13 @@ A Claude Code skill that converts text to speech using Mistral's Voxtral model, 
 
 ### Installation
 
+#### From the mackayi marketplace (recommended)
+
+```
+/plugin marketplace add keithmackay/mackayi
+/plugin install voxtral-tts@mackayi
+```
+
 #### Claude Code
 
 ```bash
