@@ -25,6 +25,13 @@ USAGE
   echo "$LONG_OUTPUT" | uv run scripts/voxtral --strip-md --truncate -v nick
     Pipe from stdin, truncate if too long.
 
+  uv run scripts/voxtral --dry-run -v nick "Here's your summary."
+    Preview mode. Validates input and reports the voice, character count,
+    estimated cost, and output path (noting if it would be served from
+    cache) without calling the Mistral API, writing an audio file, or
+    sending anything. Combine with --voice ("--voice --dry-run") to also
+    preview the destination channel without sending.
+
   --voice flag / "read that to me" / "send as audio"
     Triggers the same generate-then-send flow from within a coding agent
     conversation: strip markdown, truncate if needed, generate audio, and

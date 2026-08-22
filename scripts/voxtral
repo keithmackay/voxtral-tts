@@ -99,6 +99,9 @@ def main(argv=None) -> None:
                         help="Skip cache; always call API even if output exists")
     parser.add_argument("--play", action="store_true",
                         help="Play audio immediately after generating (macOS only)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Preview cost, output path, and voice without calling the API, "
+                             "writing a file, or sending anything")
     args = parser.parse_args(argv)
 
     if not args.text:
@@ -123,6 +126,21 @@ def main(argv=None) -> None:
             sys.exit(1)
 
     out_path = args.output if args.output else build_output_path(args.text, args.format)
+
+    if args.dry_run:
+        chars = len(args.text)
+        est_cost = chars / 1000 * 0.016
+        cached = not args.no_cache and not args.output and Path(out_path).exists()
+        print("Dry run — no API call, no file written, nothing sent.")
+        print(f"  Voice:          {args.voice}")
+        print(f"  Model:          {args.model}")
+        print(f"  Format:         {args.format}")
+        print(f"  Characters:     {chars}")
+        print(f"  Estimated cost: ${est_cost:.4f}")
+        print(f"  Output path:    {out_path}{' (cached, would skip API call)' if cached else ''}")
+        if args.play:
+            print("  Would play:     yes (afplay, macOS only)")
+        return
 
     if not args.no_cache and not args.output and Path(out_path).exists():
         print(out_path)

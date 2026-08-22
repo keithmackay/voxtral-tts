@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+- Add `--dry-run` flag to preview cost, output path, voice, and (when combined with `--voice`) destination channel, without calling the Mistral API, writing an audio file, or sending anything
 - Document mackayi marketplace installation in README
 - Add --version flag support, reporting installed version and a best-effort GitHub update check
 - Add Changelog section to README linking CHANGELOG.md

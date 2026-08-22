@@ -125,6 +125,9 @@ uv run scripts/voxtral --strip-md -v nick "**Summary:** task complete."
 
 # Pipe from stdin, truncate if too long
 echo "$LONG_OUTPUT" | uv run scripts/voxtral --strip-md --truncate -v nick
+
+# Preview cost, output path, and voice without generating, writing, or sending anything
+uv run scripts/voxtral --dry-run -v nick "Here's your summary."
 ```
 
 Send the result as a voice note:
@@ -139,7 +142,7 @@ FILE=$(uv run scripts/voxtral -v nick "Response text here")
 message channel:telegram action:send to:"<chatId>" media:"file://$FILE"
 ```
 
-When a coding agent sees a `--voice` flag or a request to "send as voice note," it strips markdown, truncates if needed, generates the audio, and sends it to the originating channel automatically.
+When a coding agent sees a `--voice` flag or a request to "send as voice note," it strips markdown, truncates if needed, generates the audio, and sends it to the originating channel automatically. Add `--dry-run` (e.g. `--voice --dry-run`) to preview the estimated cost, output path, and destination channel without generating audio, writing a file, or sending anything.
 
 ```
 /voxtral-tts --help    # print usage summary, take no other action
